@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect} from "react";
 import  {Unity,useUnityContext} from "react-unity-webgl";
 
 export function UnityContainer(props){
@@ -10,12 +10,9 @@ export function UnityContainer(props){
             codeUrl: "./build/unity.wasm",
         });
     
-    console.log("test");
-    
     const handleSendMesage = useCallback((json)=>{
        props.socket.send(json)
     });
-
 
     useEffect(() => {
         addEventListener("OnSendMessage", handleSendMesage);

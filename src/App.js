@@ -1,6 +1,7 @@
 import './App.css';
 import {UnityContainer} from "./components/UnityContainer/UnityContainer";
 
+//enter your server
 const socket = new WebSocket("ws://localhost:9000");
 
 function App() {
@@ -12,15 +13,3 @@ function App() {
 }
 
 export default App;
-
-
-        
-// Connection opened
-socket.addEventListener("open", (event) => {
-  socket.send("Hello Server!");
-});
-
-// Listen for messages
-socket.addEventListener("message", (event) => {
-  console.log("Message from server ", event.data);
-});
