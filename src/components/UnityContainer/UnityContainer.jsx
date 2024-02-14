@@ -13,7 +13,7 @@ export function UnityContainer(){
     var ws = connect();
 
     function connect() {
-        ws = new WebSocket('ws://localhost/Joystick');
+        ws = new WebSocket('ws://195.161.69.62/Joystick');
         ws.addEventListener("close", (event) => {
             sendMessage("ReactEventsHandler", "OnDisconnected");
         });
