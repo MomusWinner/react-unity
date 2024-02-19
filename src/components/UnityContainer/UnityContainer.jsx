@@ -9,18 +9,19 @@ export function UnityContainer(props){
             frameworkUrl: "./build/unity.framework.js",
             codeUrl: "./build/unity.wasm",
         });
-
+    
+    var ws = props.ws;
 
     function connect() {
-        props.ws.onclose = (event) => {
+        ws.onclose = (event) => {
             console.log("close ---------");
             sendMessage("ReactEventsHandler", "OnDisconnected");
         };
-        props.ws.onopen = (event) => {
+        ws.onopen = (event) => {
             console.log("open ----------")
             sendMessage("ReactEventsHandler", "OnConnected")
         };
-        props.ws.onmessage = (event) => {
+        ws.onmessage = (event) => {
             console.log(event.data);
             sendMessage("ReactEventsHandler", "GetMessage", event.data);
         };
@@ -29,19 +30,20 @@ export function UnityContainer(props){
 
 
     const handleConnect = useCallback(()=>{
-        if (props.ws.readyState === WebSocket.OPEN || props.ws.readyState === WebSocket.CONNECTING){
+        if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING){
             return;
         }
-        props.reconnect();
+        ws = props.reconnect();
+        connect();
     });
 
     const handleClose = useCallback(()=>{
-        props.ws.close();
+        ws.close();
     });
 
     const handleSendMessage = useCallback((json)=>{
-        console.log(props.ws.readyState);
-        props.ws.send(json);
+        console.log(ws.readyState);
+        ws.send(json);
     });
 
     useEffect(() => {
