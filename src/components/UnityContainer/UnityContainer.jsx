@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect} from "react";
 import  {Unity,useUnityContext} from "react-unity-webgl";
 
-export function UnityContainer(){
+export function UnityContainer(props){
     const {unityProvider, sendMessage, addEventListener, removeEventListener, isLoaded} =
         useUnityContext({
             loaderUrl: "./build/unity.loader.js",
@@ -9,37 +9,39 @@ export function UnityContainer(){
             frameworkUrl: "./build/unity.framework.js",
             codeUrl: "./build/unity.wasm",
         });
-    
-    var ws = connect();
+
 
     function connect() {
-        ws = new WebSocket('ws://195.161.69.62/Joystick');
-        ws.addEventListener("close", (event) => {
+        props.ws.onclose = (event) => {
+            console.log("close ---------");
             sendMessage("ReactEventsHandler", "OnDisconnected");
-        });
-        ws.addEventListener("open", (event) => {
+        };
+        props.ws.onopen = (event) => {
+            console.log("open ----------")
             sendMessage("ReactEventsHandler", "OnConnected")
-        });
-        ws.addEventListener("message", (event) => {
+        };
+        props.ws.onmessage = (event) => {
             console.log(event.data);
             sendMessage("ReactEventsHandler", "GetMessage", event.data);
-        });
-        return ws
+        };
     }
+    connect();
 
-    const handleSendMessage = useCallback((json)=>{
-       ws.send(json)
-    });
 
     const handleConnect = useCallback(()=>{
-        if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING){
+        if (props.ws.readyState === WebSocket.OPEN || props.ws.readyState === WebSocket.CONNECTING){
             return;
         }
-        ws = connect()
+        props.reconnect();
     });
 
     const handleClose = useCallback(()=>{
-        ws.close()
+        props.ws.close();
+    });
+
+    const handleSendMessage = useCallback((json)=>{
+        console.log(props.ws.readyState);
+        props.ws.send(json);
     });
 
     useEffect(() => {
