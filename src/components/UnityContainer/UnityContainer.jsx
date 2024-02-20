@@ -1,8 +1,9 @@
-import React, {useCallback, useEffect} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import  {Unity,useUnityContext} from "react-unity-webgl";
 
-export function UnityContainer(props){
-    const {unityProvider, sendMessage, addEventListener, removeEventListener, isLoaded} =
+export function UnityContainer(){
+    const [ws, setWs] = useState();
+    const {unityProvider, sendMessage, addEventListener, removeEventListener} =
         useUnityContext({
             loaderUrl: "./build/unity.loader.js",
             dataUrl: "./build/unity.data",
@@ -10,9 +11,8 @@ export function UnityContainer(props){
             codeUrl: "./build/unity.wasm",
         });
     
-    var ws = props.ws;
-
-    function connect() {
+    useEffect(() => {
+        if (ws === undefined) return;
         ws.onclose = (event) => {
             console.log("close ---------");
             sendMessage("ReactEventsHandler", "OnDisconnected");
@@ -25,21 +25,18 @@ export function UnityContainer(props){
             console.log(event.data);
             sendMessage("ReactEventsHandler", "GetMessage", event.data);
         };
-    }
-    connect();
-
+        return () => {
+            if (ws !== undefined)  ws.close();
+        };
+    }, [ws, sendMessage]);
 
     const handleConnect = useCallback(()=>{
-        if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING){
-            return;
-        }
-        ws = props.reconnect();
-        connect();
-    });
+        setWs(new WebSocket('wss://ocrv-game.ru/Joystick'));
+    }, [setWs]);
 
     const handleClose = useCallback(()=>{
-        ws.close();
-    });
+       ws.close();
+    }, [ws]);
 
     const handleSendMessage = useCallback((json)=>{
         console.log(ws.readyState);
